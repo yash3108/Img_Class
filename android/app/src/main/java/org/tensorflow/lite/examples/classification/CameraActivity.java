@@ -37,6 +37,8 @@ import android.os.Trace;
 import androidx.annotation.NonNull;
 import androidx.annotation.UiThread;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 import android.view.View;
@@ -109,7 +111,7 @@ public abstract class CameraActivity extends AppCompatActivity
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     setContentView(R.layout.tfe_ic_activity_camera);
-
+    Log.d("Camera Activity","OnCreate");
     if (hasPermission()) {
       setFragment();
     } else {
@@ -198,6 +200,7 @@ public abstract class CameraActivity extends AppCompatActivity
   }
 
   protected int[] getRgbBytes() {
+    Log.d("Camera Activity","GettRGBBytes");
     imageConverter.run();
     return rgbBytes;
   }
@@ -213,6 +216,8 @@ public abstract class CameraActivity extends AppCompatActivity
   /** Callback for android.hardware.Camera API */
   @Override
   public void onPreviewFrame(final byte[] bytes, final Camera camera) {
+
+    Log.d("Camera Activity","OnPreviewFrame");
     if (isProcessingFrame) {
       LOGGER.w("Dropping frame!");
       return;
@@ -259,6 +264,8 @@ public abstract class CameraActivity extends AppCompatActivity
   @Override
   public void onImageAvailable(final ImageReader reader) {
     // We need wait until we have some size from onPreviewSizeChosen
+
+    Log.d("Camera Activity","OnImageAvailable");
     if (previewWidth == 0 || previewHeight == 0) {
       return;
     }
@@ -267,23 +274,24 @@ public abstract class CameraActivity extends AppCompatActivity
     }
     try {
       final Image image = reader.acquireLatestImage();
-
+      Log.d("Camera Activity","LatestImageAquired");
       if (image == null) {
         return;
       }
-
+      Log.d("Camera Activity","1");
       if (isProcessingFrame) {
+        Log.d("Camera Activity","1.5");
         image.close();
         return;
       }
+      Log.d("Camera Activity","2");
       isProcessingFrame = true;
       Trace.beginSection("imageAvailable");
       final Plane[] planes = image.getPlanes();
-      fillBytes(planes, yuvBytes);
       yRowStride = planes[0].getRowStride();
       final int uvRowStride = planes[1].getRowStride();
       final int uvPixelStride = planes[1].getPixelStride();
-
+      Log.d("Camera Activity","3");
       imageConverter =
           new Runnable() {
             @Override
@@ -299,8 +307,9 @@ public abstract class CameraActivity extends AppCompatActivity
                   uvPixelStride,
                   rgbBytes);
             }
-          };
 
+          };
+      Log.d("Camera Activity","4");
       postInferenceCallback =
           new Runnable() {
             @Override
@@ -322,12 +331,14 @@ public abstract class CameraActivity extends AppCompatActivity
   @Override
   public synchronized void onStart() {
     LOGGER.d("onStart " + this);
+    Log.d("Camera Activity","START");
     super.onStart();
   }
 
   @Override
   public synchronized void onResume() {
     LOGGER.d("onResume " + this);
+    Log.d("Camera Activity","RESUME");
     super.onResume();
 
     handlerThread = new HandlerThread("inference");
@@ -338,7 +349,7 @@ public abstract class CameraActivity extends AppCompatActivity
   @Override
   public synchronized void onPause() {
     LOGGER.d("onPause " + this);
-
+    Log.d("Camera Activity","PAUSE");
     handlerThread.quitSafely();
     try {
       handlerThread.join();
@@ -354,12 +365,14 @@ public abstract class CameraActivity extends AppCompatActivity
   @Override
   public synchronized void onStop() {
     LOGGER.d("onStop " + this);
+    Log.d("Camera Activity","STOP");
     super.onStop();
   }
 
   @Override
   public synchronized void onDestroy() {
     LOGGER.d("onDestroy " + this);
+    Log.d("Camera Activity","DESTROY");
     super.onDestroy();
   }
 

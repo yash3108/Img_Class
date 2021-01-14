@@ -21,6 +21,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.Size;
 import android.util.TypedValue;
 import android.widget.Toast;
@@ -84,7 +85,7 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
   protected void processImage() {
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
     final int cropSize = Math.min(previewWidth, previewHeight);
-
+    Log.d("Classify Activity","Process Image");
     runInBackground(
         new Runnable() {
           @Override
@@ -109,7 +110,10 @@ public class ClassifierActivity extends CameraActivity implements OnImageAvailab
                     }
                   });
             }
+            Log.d("Classify Activity","Process Image Complete");
             readyForNextImage();
+
+
           }
         });
   }
